@@ -1,14 +1,31 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomReportExtensions", "CustomReportExtensions\CustomReportExtensions.csproj", "{94C57E8A-DB39-46A1-91E1-D247B0B0435A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API_Consumer", "API_Consumer\API_Consumer.csproj", "{802FD7CD-5206-4C5C-B672-58CA9A4F7DDA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{94C57E8A-DB39-46A1-91E1-D247B0B0435A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94C57E8A-DB39-46A1-91E1-D247B0B0435A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94C57E8A-DB39-46A1-91E1-D247B0B0435A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94C57E8A-DB39-46A1-91E1-D247B0B0435A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{802FD7CD-5206-4C5C-B672-58CA9A4F7DDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{802FD7CD-5206-4C5C-B672-58CA9A4F7DDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{802FD7CD-5206-4C5C-B672-58CA9A4F7DDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{802FD7CD-5206-4C5C-B672-58CA9A4F7DDA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E919C067-468B-4CA9-966C-2EB70A4C404A}
 	EndGlobalSection
 EndGlobal
