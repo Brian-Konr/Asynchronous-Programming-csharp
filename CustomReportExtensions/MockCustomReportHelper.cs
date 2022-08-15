@@ -22,12 +22,14 @@ namespace CustomReportExtensions
         private readonly int MaxConcurrentRequests;
 
         /// <summary>
-        /// 提供外部存取目前此物件正在處理的 request 數量。
+        /// 紀錄目前此物件正在處理的 request 數量。
         /// 宣告成 field 是因為 Interlocked.Increment 不能放 property
         /// </summary>
         private int _CurrentRequestCount;
 
-
+        /// <summary>
+        /// 提供外界 access _CurrentRequestCount 的媒介
+        /// </summary>
         public int CurrentRequestCount { get { return _CurrentRequestCount; } }
 
         public MockCustomReportHelper(int avgResponse, int maxRequest)
@@ -60,12 +62,15 @@ namespace CustomReportExtensions
                 throw new InvalidOperationException("Current Requests have reached Maximum concurrent requests! Try call this method later.");
             }
 
-            // 讓目前處理的數量 ++
-            _CurrentRequestCount = Interlocked.Increment(ref _CurrentRequestCount);
+            /* 讓目前處理的數量 ++
+             * 要使用 Interlocked 是因為在面對 multi-thread 修改 shared variables 時要 block 住
+             */
+            Interlocked.Increment(ref _CurrentRequestCount);
 
             // 開始做隨機等待
-            int randomWaitTime = new Random().Next(2 * AverageResponse);
-            await Task.Delay(randomWaitTime * 1000);
+            int randomWaitTime = new Random().Next(-AverageResponse, AverageResponse);
+            Console.WriteLine($"random wait time: {AverageResponse * 1000 + 300 * randomWaitTime}");
+            await Task.Delay(AverageResponse * 1000 + 300 * randomWaitTime);
 
             // 做完後將 CurrentRequestCount -1 並準備 return
             Interlocked.Decrement(ref _CurrentRequestCount);

@@ -17,9 +17,8 @@ class Program
         );
 
         List<Task<QueryDelegateResponse?>> pendingResponseArr = new List<Task<QueryDelegateResponse?>>();
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 100; i++)
         {
-            Console.WriteLine(agent.CurrentRequestCount);
             pendingResponseArr.Add(agent.PostCustomReport(request));
         }
         Task.WhenAll(pendingResponseArr).Wait();
