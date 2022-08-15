@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CustomReportExtensions
 {
-    public class MockCustomReportHelper
+    public class MockCustomReportHelper : ReportHelper
     {
         private readonly QueryDelegateResponse FakeResponse;
 
@@ -16,23 +16,7 @@ namespace CustomReportExtensions
         /// </summary>
         private readonly int AverageResponse;
 
-        /// <summary>
-        /// 最大同時請求總數，當接收超過最大請求總數會 throw exception 回去，此數值要大於 0
-        /// </summary>
-        private readonly int MaxConcurrentRequests;
-
-        /// <summary>
-        /// 紀錄目前此物件正在處理的 request 數量。
-        /// 宣告成 field 是因為 Interlocked.Increment 不能放 property
-        /// </summary>
-        private int _CurrentRequestCount;
-
-        /// <summary>
-        /// 提供外界 access _CurrentRequestCount 的媒介
-        /// </summary>
-        public int CurrentRequestCount { get { return _CurrentRequestCount; } }
-
-        public MockCustomReportHelper(int avgResponse, int maxRequest)
+        public MockCustomReportHelper(int avgResponse, int maxRequest) : base(maxRequest)
         {
             if (avgResponse < 0)
             {
@@ -44,8 +28,6 @@ namespace CustomReportExtensions
             }
 
             AverageResponse = avgResponse;
-            MaxConcurrentRequests = maxRequest;
-            _CurrentRequestCount = 0;
             FakeResponse = new QueryDelegateResponse(
                 isCompleted: true,
                 isFaulted: false,
@@ -55,7 +37,7 @@ namespace CustomReportExtensions
             );
         }
 
-        public async Task<QueryDelegateResponse?> PostCustomReport(CustomReportRequest requestBody)
+        public override async Task<QueryDelegateResponse?> PostCustomReport(CustomReportRequest requestBody)
         {
             if (_CurrentRequestCount == MaxConcurrentRequests)
             {
