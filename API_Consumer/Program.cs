@@ -21,11 +21,21 @@ class Program
         {
             pendingResponseArr.Add(agent.PostCustomReport(request));
         }
-        Task.WhenAll(pendingResponseArr).Wait();
+        int successCount = 0;
+        int failureCount = 0;
         foreach (Task<QueryDelegateResponse?> task in pendingResponseArr)
         {
-            Console.WriteLine(task.Result);
+            try
+            {
+                QueryDelegateResponse? response = task.Result;
+                successCount++;
+            }
+            catch (Exception)
+            {
+                failureCount++;
+            }
         }
+        Console.WriteLine($"success: {successCount}, failure: {failureCount}");
         //Task<QueryDelegateResponse?> pendingResponse = agent.PostCustomReport(request);
         //QueryDelegateResponse? result = pendingResponse.Result;
     }
