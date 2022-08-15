@@ -6,7 +6,8 @@ class Program
 {
     static void Main()
     {
-        CustomReportHelper agent = new CustomReportHelper();
+        //CustomReportHelper agent = new CustomReportHelper();
+        MockCustomReportHelper agent = new MockCustomReportHelper(avgResponse: 3, maxRequest: 5);
         CustomReportRequest request = new CustomReportRequest(
             dtno: 5493,
             ftno: 0,
@@ -14,8 +15,19 @@ class Program
             keyMap: string.Empty,
             assignSpid: string.Empty
         );
-        Task<QueryDelegateResponse?> pendingResponse = agent.PostCustomReport(request);
-        QueryDelegateResponse? result = pendingResponse.Result;
-        Console.WriteLine(result);
+
+        List<Task<QueryDelegateResponse?>> pendingResponseArr = new List<Task<QueryDelegateResponse?>>();
+        for (int i = 0; i < 5; i++)
+        {
+            Console.WriteLine(agent.CurrentRequestCount);
+            pendingResponseArr.Add(agent.PostCustomReport(request));
+        }
+        Task.WhenAll(pendingResponseArr).Wait();
+        foreach (Task<QueryDelegateResponse?> task in pendingResponseArr)
+        {
+            Console.WriteLine(task.Result);
+        }
+        //Task<QueryDelegateResponse?> pendingResponse = agent.PostCustomReport(request);
+        //QueryDelegateResponse? result = pendingResponse.Result;
     }
 }

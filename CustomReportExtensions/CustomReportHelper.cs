@@ -10,11 +10,11 @@ namespace CustomReportExtensions
         /// <summary>
         /// 建立連線的 client 物件
         /// </summary>
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _HttpClient;
 
         public CustomReportHelper()
         {
-            _httpClient = new HttpClient();
+            _HttpClient = new HttpClient();
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace CustomReportExtensions
         /// </summary>
         ~CustomReportHelper()
         {
-            _httpClient.Dispose();
+            _HttpClient.Dispose();
         }
 
         /// <summary>
@@ -41,22 +41,17 @@ namespace CustomReportExtensions
                 mediaType: MediaTypeNames.Application.Json
             );
 
-            // 試著 PostAsync，報錯就 throw exception 回去
-            try
-            {
-                HttpResponseMessage response = await _httpClient.PostAsync(
+            HttpResponseMessage response = await _HttpClient.PostAsync(
                     requestUri: "http://192.168.10.146:5000/api/customreport",
-                    content: httpContent);
-                response.EnsureSuccessStatusCode();
+                    content: httpContent
+            );
+            
+            // 試著 PostAsync，報錯就 throw exception 回去
+            response.EnsureSuccessStatusCode();
 
-                // content 一樣要先 ReadAsString 成 JSON 才能 deserialize
-                string responseContentInJson = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<QueryDelegateResponse>(responseContentInJson);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            // content 一樣要先 ReadAsString 成 JSON 才能 deserialize
+            string responseContentInJson = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<QueryDelegateResponse>(responseContentInJson);
         }
     }
 }

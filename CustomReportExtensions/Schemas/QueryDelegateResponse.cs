@@ -41,5 +41,14 @@ namespace CustomReportExtensions.Schemas
         /// </summary>
         [JsonProperty(PropertyName = "result")]
         public string? Result { get; set; }
+
+        public QueryDelegateResponse(bool isCompleted, bool isFaulted, string? signature, string? exception, string? result)
+        {
+            IsCompleted = isCompleted;
+            IsFaulted = isFaulted;
+            Signature = signature;
+            Exception = exception;
+            Result = result;
+        }
     }
 }
