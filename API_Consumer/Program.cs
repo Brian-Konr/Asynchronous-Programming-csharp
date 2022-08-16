@@ -18,8 +18,7 @@ class Program
     }
     static void Main()
     {
-        DoPhase3();
-        return;
+        //DoPhase3();
         //CustomReportHelper agent = new CustomReportHelper();
         MockCustomReportHelper agent = new MockCustomReportHelper(avgResponse: 3, maxRequest: 5);
         CustomReportRequest request = new CustomReportRequest(
@@ -53,21 +52,21 @@ class Program
         //Task<QueryDelegateResponse?> pendingResponse = agent.PostCustomReport(request);
         //QueryDelegateResponse? result = pendingResponse.Result;
     }
-    private static void DoPhase3()
-    {
-        MockCustomReportHelper helper1 = new MockCustomReportHelper(avgResponse: 5, maxRequest: 5);
-        CustomReportHelper helper2 = new CustomReportHelper(maxRequest: 5);
-        MockCustomReportHelper helper3 = new MockCustomReportHelper(avgResponse: 3, maxRequest: 8);
-        List<ReportHelper> reportHelperList = new List<ReportHelper> { helper1, helper2, helper3 };
-        ReportHelperDistributer distributer = new ReportHelperDistributer(reportHelperList);
-        for (int i = 0; i < 100; i++)
-        {
-            List<int> currentRequest = distributer.GetAllCurrentRequests();
-            Console.WriteLine($"First Helper current count: {currentRequest[0]}");
-            Console.WriteLine($"Second Helper current count: {currentRequest[1]}");
-            Console.WriteLine($"Third Helper current count: {currentRequest[2]}");
-            distributer.PostCustomReport(SampleRequest);
-        }
-        Console.ReadLine();
-    }
+    //private static void DoPhase3()
+    //{
+    //    MockCustomReportHelper helper1 = new MockCustomReportHelper(avgResponse: 5, maxRequest: 5);
+    //    CustomReportHelper helper2 = new CustomReportHelper(maxRequest: 5);
+    //    MockCustomReportHelper helper3 = new MockCustomReportHelper(avgResponse: 3, maxRequest: 8);
+    //    List<ReportHelper> reportHelperList = new List<ReportHelper> { helper1, helper2, helper3 };
+    //    ReportHelperDistributer distributer = new ReportHelperDistributer(reportHelperList);
+    //    for (int i = 0; i < 100; i++)
+    //    {
+    //        List<int> currentRequest = distributer.GetAllCurrentRequests();
+    //        Console.WriteLine($"First Helper current count: {currentRequest[0]}");
+    //        Console.WriteLine($"Second Helper current count: {currentRequest[1]}");
+    //        Console.WriteLine($"Third Helper current count: {currentRequest[2]}");
+    //        distributer.PostCustomReport(SampleRequest);
+    //    }
+    //    Console.ReadLine();
+    //}
 }
