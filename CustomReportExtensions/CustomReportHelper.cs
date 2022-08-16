@@ -10,11 +10,11 @@ namespace CustomReportExtensions
         /// <summary>
         /// 建立連線的 client 物件
         /// </summary>
-        private readonly HttpClient _HttpClient;
+        private readonly HttpClient HttpClient;
 
         public CustomReportHelper(int maxRequest) : base(maxRequest)
         {
-            _HttpClient = new HttpClient();
+            HttpClient = new HttpClient();
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace CustomReportExtensions
         /// </summary>
         ~CustomReportHelper()
         {
-            _HttpClient.Dispose();
+            HttpClient.Dispose();
         }
 
         /// <summary>
@@ -51,7 +51,8 @@ namespace CustomReportExtensions
                 mediaType: MediaTypeNames.Application.Json
             );
 
-            HttpResponseMessage response = await _HttpClient.PostAsync(
+            // TODO: requetUri cannot be fixed 
+            HttpResponseMessage response = await HttpClient.PostAsync(
                     requestUri: "http://192.168.10.146:5000/api/customreport",
                     content: httpContent
             );

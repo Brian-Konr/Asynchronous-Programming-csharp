@@ -46,6 +46,7 @@ namespace CustomReportExtensions
 
             /* 讓目前處理的數量 ++
              * 要使用 Interlocked 是因為在面對 multi-thread 修改 shared variables 時要 block 住
+             * TODO: 要拿 increment return value 來判斷最大同時請求
              */
             Interlocked.Increment(ref _CurrentRequestCount);
 
