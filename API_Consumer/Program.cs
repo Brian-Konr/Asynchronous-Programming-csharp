@@ -55,12 +55,12 @@ class Program
     }
     private static void DoPhase4()
     {
-        MockCustomReportHelper helper1 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 5);
-        MockCustomReportHelper helper2 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 1);
+        MockCustomReportHelper helper1 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 100);
+        MockCustomReportHelper helper2 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 80);
         MockCustomReportHelper helper3 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 8);
         List<ICustomReportHelper> reportHelperList = new List<ICustomReportHelper> { helper1, helper2, helper3 };
         //ReportHelperRandomDispatcher distributer = new ReportHelperRandomDispatcher(reportHelperList);
-        ICustomReportHelper helper = new ReportHelperSmartDispatcher(reportHelperList, new int[] { 5, 1, 8 });
+        ICustomReportHelper helper = new ReportHelperSmartDispatcher(reportHelperList, new int[] { 100, 80, 8 });
         Task<QueryDelegateResponse?>[] taskArr = new Task<QueryDelegateResponse?>[1000];
         for (int i = 0; i < 1000; i++)
         {

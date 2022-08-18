@@ -5,45 +5,38 @@ namespace CustomReportExtensions
 {
    public class ReportHelperSmartDispatcher : ICustomReportHelper
     {
-        private int[] ConnectionCountArr;
-        // queue 要記 helper instance 以及他的編號 (讓 ConnectionCountArr 可以找到對應 helper 做資源加減)
-        private ConcurrentQueue<(ICustomReportHelper, int)> AvailableHelperQueue;
-        private readonly SemaphoreSlim Locker;
-
+        private SemaphoreSlim Locker;
+        private ConcurrentQueue<ICustomReportHelper> AvailableHelperQueue;
 
         public ReportHelperSmartDispatcher(List<ICustomReportHelper> helperList, int[] connectionCountArr)
         {
-            AvailableHelperQueue = new ConcurrentQueue<(ICustomReportHelper, int)>();
-            ConnectionCountArr = connectionCountArr;
-            int helperCount = helperList.Count;
-            for (int i = 0; i < helperCount; i++)
+            int connectionCountSum = 0;
+            AvailableHelperQueue = new ConcurrentQueue<ICustomReportHelper>();
+            for (int i = 0; i < helperList.Count; i++)
             {
-                AvailableHelperQueue.Enqueue((helperList[i], i));
+                for (int connectionCount = 0; connectionCount < connectionCountArr[i]; connectionCount++)
+                {
+                    connectionCountSum++;
+                    AvailableHelperQueue.Enqueue(helperList[i]);
+                }
             }
-            Locker = new SemaphoreSlim(initialCount: helperCount, maxCount: helperCount);
+            Locker = new SemaphoreSlim(initialCount: connectionCountSum, maxCount: connectionCountSum);
         }
 
         public async Task<QueryDelegateResponse?> PostCustomReport(CustomReportRequest requestBody)
         {
-            // 先 WaitAsync 確認 SemaphoreSlim 有資源可以拿
+            // 先 wait async 直到有資源釋放再走下去 dequeue 拿資源
             await Locker.WaitAsync();
-            AvailableHelperQueue.TryDequeue(out (ICustomReportHelper helper, int helperID) resource);
-            if (Interlocked.Decrement(ref ConnectionCountArr[resource.helperID]) == 0)
+            if (AvailableHelperQueue.TryDequeue(out ICustomReportHelper? availableHelper))
             {
-                QueryDelegateResponse? response = await resource.helper.PostCustomReport(requestBody);
-                AvailableHelperQueue.Enqueue(resource);
-                Interlocked.Increment(ref ConnectionCountArr[resource.helperID]);
+                // 資源先去做事 做完後重新 enqueue 並 release locker
+                QueryDelegateResponse? response = await availableHelper.PostCustomReport(requestBody);
+                AvailableHelperQueue.Enqueue(availableHelper);
                 Locker.Release();
                 return response;
             }
-            else 
-            {
-                AvailableHelperQueue.Enqueue(resource);
-                Locker.Release();
-                QueryDelegateResponse? response = await resource.helper.PostCustomReport(requestBody);
-                Interlocked.Increment(ref ConnectionCountArr[resource.helperID]);
-                return response;
-            }
+            Console.WriteLine("Something went wrong! Queue should always have at least one helper after Locker.WaitAsync()");
+            return null;
         }
     }
 }
