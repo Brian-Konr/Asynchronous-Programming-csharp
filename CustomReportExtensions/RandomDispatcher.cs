@@ -2,11 +2,11 @@
 
 namespace CustomReportExtensions
 {
-    public class ReportHelperRandomDispatcher : ICustomReportHelper
+    public class RandomDispatcher : ICustomReportHelper
     {
         private readonly Random RandomGenerator;
         private readonly List<ICustomReportHelper> HelperList;
-        public ReportHelperRandomDispatcher(List<ICustomReportHelper> helperList)
+        public RandomDispatcher(List<ICustomReportHelper> helperList)
         {
             HelperList = helperList;
             RandomGenerator = new Random();

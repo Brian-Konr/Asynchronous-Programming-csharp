@@ -3,12 +3,12 @@ using System.Collections.Concurrent;
 
 namespace CustomReportExtensions
 {
-   public class ReportHelperSmartDispatcher : ICustomReportHelper
+   public class SmartDispatcher : ICustomReportHelper
     {
         private SemaphoreSlim Locker;
         private ConcurrentQueue<ICustomReportHelper> AvailableHelperQueue;
 
-        public ReportHelperSmartDispatcher(List<ICustomReportHelper> helperList, int[] connectionCountArr)
+        public SmartDispatcher(List<ICustomReportHelper> helperList, int[] connectionCountArr)
         {
             int connectionCountSum = 0;
             AvailableHelperQueue = new ConcurrentQueue<ICustomReportHelper>();

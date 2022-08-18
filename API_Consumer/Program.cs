@@ -20,7 +20,6 @@ class Program
     {
         DoPhase4();
         return;
-        //CustomReportHelper agent = new CustomReportHelper();
         MockCustomReportHelper agent = new MockCustomReportHelper(avgResponse: 3, maxRequest: 5);
         CustomReportRequest request = new CustomReportRequest(
             dtno: 5493,
@@ -60,7 +59,7 @@ class Program
         MockCustomReportHelper helper3 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 8);
         List<ICustomReportHelper> reportHelperList = new List<ICustomReportHelper> { helper1, helper2, helper3 };
         //ReportHelperRandomDispatcher distributer = new ReportHelperRandomDispatcher(reportHelperList);
-        ICustomReportHelper helper = new ReportHelperSmartDispatcher(reportHelperList, new int[] { 100, 80, 8 });
+        ICustomReportHelper helper = new SmartDispatcher(reportHelperList, new int[] { 100, 80, 8 });
         Task<QueryDelegateResponse?>[] taskArr = new Task<QueryDelegateResponse?>[1000];
         for (int i = 0; i < 1000; i++)
         {
