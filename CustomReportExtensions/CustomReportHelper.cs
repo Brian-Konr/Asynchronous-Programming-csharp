@@ -14,7 +14,6 @@ namespace CustomReportExtensions
 
         private readonly string RequestUri;
 
-
         public CustomReportHelper()
         {
             MyClient = new HttpClient();
