@@ -5,9 +5,10 @@ namespace CustomReportExtensions
 {
    public class SmartDispatcher : ICustomReportHelper
     {
-        private SemaphoreSlim Locker;
+        private SemaphoreSlim ResourceCounter;
         private ConcurrentQueue<ICustomReportHelper> AvailableHelperQueue;
 
+        // TODO: helperList 跟 CountArr 要能夠對齊
         public SmartDispatcher(List<ICustomReportHelper> helperList, int[] connectionCountArr)
         {
             int connectionCountSum = 0;
@@ -20,23 +21,28 @@ namespace CustomReportExtensions
                     AvailableHelperQueue.Enqueue(helperList[i]);
                 }
             }
-            Locker = new SemaphoreSlim(initialCount: connectionCountSum, maxCount: connectionCountSum);
+            ResourceCounter = new SemaphoreSlim(initialCount: connectionCountSum, maxCount: connectionCountSum);
         }
 
         public async Task<QueryDelegateResponse?> PostCustomReport(CustomReportRequest requestBody)
         {
             // 先 wait async 直到有資源釋放再走下去 dequeue 拿資源
-            await Locker.WaitAsync();
+            await ResourceCounter.WaitAsync();
             if (AvailableHelperQueue.TryDequeue(out ICustomReportHelper? availableHelper))
             {
                 // 資源先去做事 做完後重新 enqueue 並 release locker
-                QueryDelegateResponse? response = await availableHelper.PostCustomReport(requestBody);
-                AvailableHelperQueue.Enqueue(availableHelper);
-                Locker.Release();
-                return response;
+                try
+                {
+                    QueryDelegateResponse? response = await availableHelper.PostCustomReport(requestBody);
+                    return response;
+                }
+                finally
+                {
+                    AvailableHelperQueue.Enqueue(availableHelper);
+                    ResourceCounter.Release();
+                }
             }
-            Console.WriteLine("Something went wrong! Queue should always have at least one helper after Locker.WaitAsync()");
-            return null;
+            throw new Exception("Something went wrong! Queue should always have at least one helper after Locker.WaitAsync()");
         }
     }
 }
