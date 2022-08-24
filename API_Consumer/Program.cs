@@ -54,14 +54,18 @@ class Program
     }
     private static void DoPhase4()
     {
-        MockCustomReportHelper helper1 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 100);
-        MockCustomReportHelper helper2 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 80);
-        MockCustomReportHelper helper3 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 8);
-        List<ICustomReportHelper> reportHelperList = new List<ICustomReportHelper> { helper1, helper2, helper3 };
-        //ReportHelperRandomDispatcher distributer = new ReportHelperRandomDispatcher(reportHelperList);
-        ICustomReportHelper helper = new SmartDispatcher(reportHelperList, new int[] { 100, 80, 8 });
-        Task<QueryDelegateResponse?>[] taskArr = new Task<QueryDelegateResponse?>[1000];
-        for (int i = 0; i < 1000; i++)
+        MockCustomReportHelper helper1 = new MockCustomReportHelper(avgResponse: 5, maxRequest: 1);
+        MockCustomReportHelper helper2 = new MockCustomReportHelper(avgResponse: 2, maxRequest: 3);
+        MockCustomReportHelper helper3 = new MockCustomReportHelper(avgResponse: 1, maxRequest: 3);
+        List<(ICustomReportHelper instance, int maxRequest, int helperID)> helperList = new()
+        {
+            (helper1, 1, 1),
+            (helper2, 2, 2),
+            (helper3, 3, 3)
+        };
+        ICustomReportHelper helper = new ServerBasedWaitDispatcher(helperList);
+        Task<QueryDelegateResponse?>[] taskArr = new Task<QueryDelegateResponse?>[100];
+        for (int i = 0; i < 100; i++)
         {
             taskArr[i] = helper.PostCustomReport(SampleRequest);
         }

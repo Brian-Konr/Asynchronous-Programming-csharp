@@ -13,46 +13,51 @@ namespace CustomReportExtensions
         private ConcurrentQueue<(CustomReportRequest, TaskCompletionSource<QueryDelegateResponse?>)> Requests;
         private SemaphoreSlim RequestCounter;
 
-        public ServerBasedWaitDispatcher(List<(ICustomReportHelper instance, int maxConcurrentRequest)> helperList)
+        public ServerBasedWaitDispatcher(List<(ICustomReportHelper instance, int maxConcurrentRequest, int helperID)> helperList)
         {
             Requests = new ConcurrentQueue<(CustomReportRequest, TaskCompletionSource<QueryDelegateResponse?>)>();
             RequestCounter = new SemaphoreSlim(0);
 
             // 開始讓 server 去試著 dequeue resource
-            foreach ((ICustomReportHelper instance, int maxConcurrentRequest) in helperList)
+            foreach ((ICustomReportHelper instance, int maxConcurrentRequest, int helperID) in helperList)
             {
-                // 每個 helper 都有一個自己的 max request counter
-                SemaphoreSlim availableCounter = new (initialCount: maxConcurrentRequest, maxCount: maxConcurrentRequest);
-                Task.Run(async () =>
+                /* maxConcurrentRequest 代表一個 server 可以一次接的量，所以這邊就 for loop 出這麼多的量
+                 * 然後每個都去等 request queue 的東西
+                 */
+                for (int i = 0; i < maxConcurrentRequest; i++)
                 {
-                    while (true)
+                    Task.Run(async () =>
                     {
-                        // 先確認自己還有空間可以處理新的 request
-                        await availableCounter.WaitAsync();
-                        // 再確認還有 requests 等著被處理
-                        await RequestCounter.WaitAsync();
-                        // dequeue request 拿資源來做
-                        if (Requests.TryDequeue(out (CustomReportRequest body, TaskCompletionSource<QueryDelegateResponse?> pendingResponse) todoTask))
+                        while (true)
                         {
-                            todoTask.pendingResponse.SetResult(await instance.PostCustomReport(todoTask.body));
+                            // 再確認還有 requests 等著被處理
+                            await RequestCounter.WaitAsync();
+                            // dequeue request 拿資源來做
+                            if (Requests.TryDequeue(out (CustomReportRequest body, TaskCompletionSource<QueryDelegateResponse?> pendingResponse) todoTask))
+                            {
+                                Console.WriteLine($"request consumed by helper {helperID}");
+                                try
+                                {
+                                    todoTask.pendingResponse.SetResult(await instance.PostCustomReport(todoTask.body));
+                                }
+                                catch (Exception ex)
+                                {
+                                    todoTask.pendingResponse.SetException(ex);
+                                }
+                            }
                         }
-                        else
-                        {
-                            todoTask.pendingResponse.SetCanceled();
-                        }
-                        availableCounter.Release();
-                    }
-                });
+                    });
+                }
             }
         }
 
-        public async Task<QueryDelegateResponse?> PostCustomReport(CustomReportRequest requestBody)
+        public Task<QueryDelegateResponse?> PostCustomReport(CustomReportRequest requestBody)
         {
             // enqueue 時要連同 taskcompletionsource 一起放進去，才能在 function 內被 setResult
             TaskCompletionSource<QueryDelegateResponse?> pendingResponse = new TaskCompletionSource<QueryDelegateResponse?>();
             Requests.Enqueue((requestBody, pendingResponse));
             RequestCounter.Release();
-            return await pendingResponse.Task;
+            return pendingResponse.Task;
         }
     }
 }
